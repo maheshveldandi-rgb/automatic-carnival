@@ -1,0 +1,33 @@
+name: Build LRDMS APK
+
+on:
+  push:
+    branches: [ lrdms-apk-build-v4 ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android 17 SDK
+        run: yes | sdkmanager --licenses >/dev/null && sdkmanager "platforms;android-37" "build-tools;36.0.0" "platform-tools"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+      - name: Build debug APK
+        run: gradle --no-daemon :app:assembleDebug
+      - name: Rename APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk LRDMS.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LRDMS-APK
+          path: LRDMS.apk
+          if-no-files-found: error
