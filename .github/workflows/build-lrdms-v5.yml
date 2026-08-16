@@ -1,0 +1,66 @@
+name: Build LRDMS Android V5
+on:
+  push:
+    branches: [ lrdms-v5-android15-16 ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract project
+        run: |
+          mkdir buildsrc
+          unzip -q LRDMS_V5_BUILD_SOURCE.zip -d buildsrc
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android 16 SDK
+        run: yes | sdkmanager --licenses >/dev/null && sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.5.0'
+      - name: Generate release signing key
+        shell: bash
+        run: |
+          PASS="$(openssl rand -hex 16)"
+          keytool -genkeypair -v \
+            -keystore "$GITHUB_WORKSPACE/lrdms-release.jks" \
+            -storepass "$PASS" -keypass "$PASS" -alias lrdms \
+            -keyalg RSA -keysize 3072 -validity 10000 \
+            -dname "CN=LRDMS, OU=Lamp Room, O=EMS Solutions, L=Kothagudem, ST=Telangana, C=IN"
+          echo "LRDMS_KEYSTORE=$GITHUB_WORKSPACE/lrdms-release.jks" >> "$GITHUB_ENV"
+          echo "LRDMS_STORE_PASSWORD=$PASS" >> "$GITHUB_ENV"
+          echo "LRDMS_KEY_PASSWORD=$PASS" >> "$GITHUB_ENV"
+          echo "LRDMS_KEY_ALIAS=lrdms" >> "$GITHUB_ENV"
+          {
+            echo "LRDMS Android V5 release signing information"
+            echo "Keystore: lrdms-release.jks"
+            echo "Alias: lrdms"
+            echo "Store password: $PASS"
+            echo "Key password: $PASS"
+            echo "IMPORTANT: Keep this keystore + password to sign future upgrades with the same certificate."
+          } > "$GITHUB_WORKSPACE/LRDMS_SIGNING_INFO.txt"
+      - name: Build release APK
+        working-directory: buildsrc
+        run: gradle --no-daemon :app:assembleRelease
+      - name: Verify APK signature
+        run: |
+          cp buildsrc/app/build/outputs/apk/release/app-release.apk LRDMS_Android_15_16_V5.apk
+          apksigner verify --verbose --print-certs LRDMS_Android_15_16_V5.apk | tee APK_SIGNATURE_VERIFY.txt
+          sha256sum LRDMS_Android_15_16_V5.apk | tee LRDMS_APK_SHA256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LRDMS-Android-15-16-V5
+          path: |
+            LRDMS_Android_15_16_V5.apk
+            lrdms-release.jks
+            LRDMS_SIGNING_INFO.txt
+            APK_SIGNATURE_VERIFY.txt
+            LRDMS_APK_SHA256.txt
+          if-no-files-found: error
