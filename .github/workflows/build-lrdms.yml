@@ -29,11 +29,11 @@ jobs:
       - name: Install Android 17 SDK
         shell: bash
         run: |
-          android --sdk="$ANDROID_HOME" sdk install --canary platforms/android-37 build-tools/37.0.0
-          android --sdk="$ANDROID_HOME" sdk list 'platforms/android-37|build-tools/37' --all --canary
+          android --sdk="$ANDROID_HOME" sdk install --canary platforms/android-37.0 build-tools/37.0.0
+          android --sdk="$ANDROID_HOME" sdk list 'platforms/android-37.0|build-tools/37.0.0' --all --canary
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '9.6.0'
+          gradle-version: '9.5.0'
       - name: Build debug APK
         run: gradle --no-daemon :app:assembleDebug
       - name: Rename APK
