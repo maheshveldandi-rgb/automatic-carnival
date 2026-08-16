@@ -11,10 +11,17 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - name: Extract project
+      - name: Reconstruct and verify project source
+        shell: bash
         run: |
+          set -euo pipefail
+          cat source_chunks/chunk_00.txt source_chunks/chunk_01.txt source_chunks/chunk_02.txt source_chunks/chunk_03.txt source_chunks/chunk_04.txt source_chunks/chunk_05.txt source_chunks/chunk_06.txt source_chunks/chunk_07.txt source_chunks/chunk_08.txt > LRDMS_SOURCE.b64
+          test "$(wc -c < LRDMS_SOURCE.b64)" = "56276"
+          echo "7c45ba5bb8d8a4e634574c1bc27dae2e5346ded781016019103cd94f647a5632  LRDMS_SOURCE.b64" | sha256sum -c -
+          base64 -d LRDMS_SOURCE.b64 > LRDMS_V5_BUILD_SOURCE_RECONSTRUCTED.zip
+          echo "76b1c015ad36f5ca517f11b41881b62f1dd12ad89e5b522afd3411a72491605c  LRDMS_V5_BUILD_SOURCE_RECONSTRUCTED.zip" | sha256sum -c -
           mkdir buildsrc
-          unzip -q LRDMS_V5_BUILD_SOURCE.zip -d buildsrc
+          unzip -q LRDMS_V5_BUILD_SOURCE_RECONSTRUCTED.zip -d buildsrc
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
