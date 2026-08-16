@@ -15,11 +15,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          wc -c source_chunks/chunk_*.txt
-          sha256sum source_chunks/chunk_*.txt
-          cat source_chunks/chunk_00.txt source_chunks/chunk_01.txt source_chunks/chunk_02.txt source_chunks/chunk_03.txt source_chunks/chunk_04.txt source_chunks/chunk_05.txt source_chunks/chunk_06.txt source_chunks/chunk_07.txt source_chunks/chunk_08.txt > LRDMS_SOURCE.b64
-          echo "Combined bytes: $(wc -c < LRDMS_SOURCE.b64)"
-          echo "Combined SHA: $(sha256sum LRDMS_SOURCE.b64)"
+          cat source_chunks/chunk_00.txt source_chunks/chunk_01.txt source_chunks/chunk_02.txt source_chunks/chunk_03.txt source_chunks/chunk_04.txt source_chunks/chunk_05a.txt source_chunks/chunk_05b.txt source_chunks/chunk_06.txt source_chunks/chunk_07.txt source_chunks/chunk_08.txt > LRDMS_SOURCE.b64
           test "$(wc -c < LRDMS_SOURCE.b64)" = "56276"
           echo "7c45ba5bb8d8a4e634574c1bc27dae2e5346ded781016019103cd94f647a5632  LRDMS_SOURCE.b64" | sha256sum -c -
           base64 -d LRDMS_SOURCE.b64 > LRDMS_V5_BUILD_SOURCE_RECONSTRUCTED.zip
