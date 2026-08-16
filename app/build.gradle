@@ -1,0 +1,29 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.emssolutions.scclcaplamp'
+    compileSdk 37
+
+    defaultConfig {
+        applicationId 'com.emssolutions.scclcaplamp'
+        minSdk 29
+        targetSdk 37
+        versionCode 5
+        versionName '4.1.0'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.activity:activity:1.13.0'
+    implementation 'androidx.camera:camera-camera2:1.6.1'
+    implementation 'androidx.camera:camera-lifecycle:1.6.1'
+    implementation 'androidx.camera:camera-view:1.6.1'
+    implementation 'com.google.mlkit:barcode-scanning:17.3.0'
+}
