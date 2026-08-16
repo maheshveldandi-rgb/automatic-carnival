@@ -20,11 +20,17 @@ jobs:
         with:
           cmdline-tools-version: 15859902
           packages: platform-tools
+      - name: Install current Android CLI
+        shell: bash
+        run: |
+          curl -fsSL https://dl.google.com/android/cli/latest/linux_x86_64/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/android" --version
       - name: Install Android 17 SDK
         shell: bash
         run: |
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager --channel=3 "platforms;android-37" "build-tools;37.0.0" "platform-tools"
+          android --sdk="$ANDROID_HOME" sdk install --canary platforms/android-37 build-tools/37.0.0
+          android --sdk="$ANDROID_HOME" sdk list 'platforms/android-37|build-tools/37' --all --canary
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.6.0'
